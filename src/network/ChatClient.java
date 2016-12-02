@@ -9,7 +9,7 @@ import java.util.Vector;
  * Created by Marcin Jamroz on 15.11.2016.
  * główna klasa programu, uruchamia metody umożliwiające działanie backupera
  */
-public class BackuperClient {
+public class ChatClient {
 
 
     /**
@@ -32,9 +32,9 @@ public class BackuperClient {
     private Protocol protocol;
 
     public static void main(String[] args) {
-        BackuperClient backuperClient = new BackuperClient();
+        ChatClient chatClient = new ChatClient();
         try {
-            backuperClient.init();
+            chatClient.init();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,7 +90,7 @@ public class BackuperClient {
         columnNames.add("Checksum");
 
         String directrory = System.getProperty("user.dir");
-        ClientBrowser clientBrowser = new ClientBrowser(protocol.getServerFiles(username), columnNames, username, serverIP, serverPort, protocol, directrory);
+        //ClientBrowser clientBrowser = new ClientBrowser(protocol.getServerFiles(username), columnNames, username, serverIP, serverPort, protocol, directrory);
         //    clientBrowser.updateFileRecords(serverIP,serverPort,username,protocol.getFileRecords(username));
         System.out.print("");
     }

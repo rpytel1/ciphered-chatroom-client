@@ -1,10 +1,10 @@
 package network;
 
-import GUI.LoadWindow;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -59,7 +59,7 @@ public class Protocol {
         return answer;
     }
 
-    public String downloadFile(String username, String ID, String filename) throws IOException {
+  /*  public String downloadFile(String username, String ID, String filename) throws IOException {
         Socket socket = new Socket(serverIP, serverPort);
         DataInputStream dis = new DataInputStream(socket.getInputStream());
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
@@ -80,7 +80,7 @@ public class Protocol {
         dos.close();
         socket.close();
         return "cap";
-    }
+    }*/
 
     public void removeFile(String username, int ID) throws IOException {
         Socket socket = new Socket(serverIP, serverPort);
@@ -126,7 +126,7 @@ public class Protocol {
         return data;
     }
 
-    public ArrayList<FileRecord> getFileRecords(String username) throws IOException {
+   /* public ArrayList<FileRecord> getFileRecords(String username) throws IOException {
         Socket socket = new Socket(serverIP, serverPort);
         DataInputStream dis = new DataInputStream(socket.getInputStream());
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
@@ -154,7 +154,7 @@ public class Protocol {
         socket.close();
 
         return list;
-    }
+    }*/
 
 
 }
