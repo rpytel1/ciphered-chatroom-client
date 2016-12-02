@@ -58,12 +58,12 @@ public class ChatClient {
 
 
         String registrationLoginAnswer = "kappa";
+        protocol = new Protocol(serverIP, serverPort);
 
         while (!registrationLoginAnswer.equals("LOG_IN")) {
             LogOrRegister logOrRegister = new LogOrRegister();
             String answerLogOrRegister = logOrRegister.getUserAction();
 
-            protocol = new Protocol(serverIP, serverPort);
 
             if (answerLogOrRegister.equals("REGISTER")) {
                 Registration registration = new Registration();

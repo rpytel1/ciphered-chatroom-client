@@ -68,7 +68,8 @@ public class ChatWindow extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String text = textField.getText();
                 try {
-                    protocol.sendMessage(username + text);
+                    protocol.sendMessage(username + ":" + text);
+                    System.out.println(username + text);
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
