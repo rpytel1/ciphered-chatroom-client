@@ -5,7 +5,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Vector;
 
 /**
  * Created by Marcin Jamroz on 15.11.2016.
@@ -23,40 +22,63 @@ public class Protocol {
      */
     int serverPort;
 
+    Socket socket;
+    DataInputStream dis;
+    DataOutputStream dos;
 
-    public Protocol(String serverIP, int serverPort) {
+
+    public Protocol(String serverIP, int serverPort) throws IOException {
         this.serverIP = serverIP;
         this.serverPort = serverPort;
+        socket = new Socket(serverIP, serverPort);
+        dis = new DataInputStream(socket.getInputStream());
+        dos = new DataOutputStream(socket.getOutputStream());
     }
 
     public String register(String username, String password) throws IOException {
-        Socket socket = new Socket(serverIP, serverPort);
+       /* Socket socket = new Socket(serverIP, serverPort);
         DataInputStream dis = new DataInputStream(socket.getInputStream());
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-
+*/
         dos.writeUTF("REGISTER");
         dos.writeUTF(username);
         dos.writeUTF(password);
         String answer = dis.readUTF();
-        dis.close();
+    /*    dis.close();
         dos.close();
-        socket.close();
+        socket.close();*/
         return answer;
     }
 
     public String login(String username, String password) throws IOException {
-        Socket socket = new Socket(serverIP, serverPort);
+     /*   Socket socket = new Socket(serverIP, serverPort);
         DataInputStream dis = new DataInputStream(socket.getInputStream());
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-
+*/
         dos.writeUTF("LOGIN");
         dos.writeUTF(username);
         dos.writeUTF(password);
         String answer = dis.readUTF();
-        dis.close();
+     /*   dis.close();
         dos.close();
-        socket.close();
+        socket.close();*/
         return answer;
+    }
+
+    public String receiveMessages() throws IOException {
+        //socket = new Socket(serverIP,serverPort);
+        // dis = new DataInputStream(socket.getInputStream());
+        String message = "";
+        if (dis.available() > 0)
+            message = dis.readUTF();
+        else message = null;
+
+        return message;
+    }
+
+    public void sendMessage(String message) throws IOException {
+        dos.writeUTF("MESSAGE");
+        dos.writeUTF(message);
     }
 
   /*  public String downloadFile(String username, String ID, String filename) throws IOException {
@@ -82,7 +104,7 @@ public class Protocol {
         return "cap";
     }*/
 
-    public void removeFile(String username, int ID) throws IOException {
+   /* public void removeFile(String username, int ID) throws IOException {
         Socket socket = new Socket(serverIP, serverPort);
         DataInputStream dis = new DataInputStream(socket.getInputStream());
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
@@ -90,9 +112,9 @@ public class Protocol {
         dos.writeUTF("DELETE");
         dos.writeUTF(username);
         dos.writeInt(ID);
-    }
+    }*/
 
-    public Vector<Vector<String>> getServerFiles(String username) throws IOException {
+   /* public Vector<Vector<String>> getServerFiles(String username) throws IOException {
         Socket socket = new Socket(serverIP, serverPort);
         DataInputStream dis = new DataInputStream(socket.getInputStream());
         DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
@@ -124,7 +146,7 @@ public class Protocol {
         socket.close();
 
         return data;
-    }
+    }*/
 
    /* public ArrayList<FileRecord> getFileRecords(String username) throws IOException {
         Socket socket = new Socket(serverIP, serverPort);

@@ -3,7 +3,6 @@ package network;
 import GUI.*;
 
 import java.io.IOException;
-import java.util.Vector;
 
 /**
  * Created by Marcin Jamroz on 15.11.2016.
@@ -69,27 +68,44 @@ public class ChatClient {
             if (answerLogOrRegister.equals("REGISTER")) {
                 Registration registration = new Registration();
                 String[] data = registration.getUserRegistrationInformation();
-                Alert alert = new Alert(protocol.register(data[0], data[1]));                     // todo trzeba dorobic okienko informujace o istniejacym uzytkowniu o tym loginie
+                Alert alert = new Alert(protocol.register(data[0], data[1]));
 
             } else {
                 Login login = new Login();
                 String[] data = login.getUserLoginInformation();
-                registrationLoginAnswer = protocol.login(data[0], data[1]);//todo okienko informujace o bledzie logowania
+                registrationLoginAnswer = protocol.login(data[0], data[1]);
                 Alert alert = new Alert(registrationLoginAnswer);
                 username = data[0];
             }
         }
 
+
+        ChatWindow chatWindow = new ChatWindow(protocol, username);
+
+        Thread receiveThread = new Thread() {
+            public void run() {
+                String message = "";
+                try {
+                    message = protocol.receiveMessages();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (message != null)
+                    chatWindow.updateTextArea(message);
+            }
+        };
+        receiveThread.start();
+
         System.out.println("Koniec while");
 
-        Vector<String> columnNames = new Vector<>();
+      /*  Vector<String> columnNames = new Vector<>();
         columnNames.add("ID");
         columnNames.add("FileName");
         columnNames.add("FilePath");
         columnNames.add("Size");
-        columnNames.add("Checksum");
+        columnNames.add("Checksum");*/
 
-        String directrory = System.getProperty("user.dir");
+        // String directrory = System.getProperty("user.dir");
         //ClientBrowser clientBrowser = new ClientBrowser(protocol.getServerFiles(username), columnNames, username, serverIP, serverPort, protocol, directrory);
         //    clientBrowser.updateFileRecords(serverIP,serverPort,username,protocol.getFileRecords(username));
         System.out.print("");
