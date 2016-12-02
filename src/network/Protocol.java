@@ -69,10 +69,11 @@ public class Protocol {
         //socket = new Socket(serverIP,serverPort);
         // dis = new DataInputStream(socket.getInputStream());
         String message = "";
-        if (dis.available() > 0)
+        //   if (dis.available() > 0)
             message = dis.readUTF();
-        else message = null;
+        // else message = null;
 
+        System.out.println(message);
         return message;
     }
 

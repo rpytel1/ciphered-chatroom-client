@@ -84,14 +84,17 @@ public class ChatClient {
 
         Thread receiveThread = new Thread() {
             public void run() {
-                String message = "";
-                try {
-                    message = protocol.receiveMessages();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                if (message != null)
+                while (true) {
+                    String message = "";
+
+                    try {
+                        message = protocol.receiveMessages();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("czeka");
                     chatWindow.updateTextArea(message);
+                }
             }
         };
         receiveThread.start();
