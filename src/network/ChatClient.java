@@ -89,63 +89,28 @@ public class ChatClient {
 
         if(protocol.receiveMessages().equals("startKeyDistribution"));
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                for (int i = 0; i < userNumber - 1; i++) {
-                    try {
-                        String receivedMessage = protocol.receiveMessages();
-                        int finalI = i;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                setPublicKeys(receivedMessage);
-                                if (finalI == userNumber - 1) {
-                                    monitorState = false;
-                                    monitor.notifyAll();
-                                }
-                            }
-                        });
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                try {
-                    protocol.sendMessage("settingKeysDone");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
 
         generateAndSendKeys();
 
-        monitorState = true;
-        while (monitorState) {
-            synchronized (monitor) {
-                try {
-                    monitor.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        for (int i = 0; i < userNumber - 1; i++) {
+            String messsage = protocol.receiveMessages();
+            setPublicKeys(messsage);
 
+        }
 
 
         ChatWindow chatWindow = new ChatWindow(protocol, username);
 
 
-
         new Thread(new Runnable() {
             @Override
             public void run() {
+
                 while (!outFlag) {
                     String message = "";
 
                     try {
+
                         message = protocol.receiveMessages();
                         chatWindow.updateTextArea(message);
                     } catch (IOException e) {
