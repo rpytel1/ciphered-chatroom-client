@@ -66,13 +66,9 @@ public class Protocol {
     }
 
     public String receiveMessages() throws IOException {
-        //socket = new Socket(serverIP,serverPort);
-        // dis = new DataInputStream(socket.getInputStream());
-        String message = "";
-        //   if (dis.available() > 0)
-            message = dis.readUTF();
-        // else message = null;
 
+        String message = "";
+            message = dis.readUTF();
         System.out.println(message);
         return message;
     }

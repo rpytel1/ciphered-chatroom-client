@@ -3,6 +3,11 @@ package network;
 import GUI.*;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 
 /**
  * Created by Marcin Jamroz on 15.11.2016.
@@ -28,6 +33,7 @@ public class ChatClient {
      * instancja protokołu komunikacyjnego
      */
     private Protocol protocol;
+    private User user;
 
     public static void main(String[] args) {
         ChatClient chatClient = new ChatClient();
@@ -80,6 +86,7 @@ public class ChatClient {
 
         if(protocol.receiveMessages().equals("startKeyDistribution"));
         ChatWindow chatWindow = new ChatWindow(protocol, username);
+        generateAndSendKeys();
 
 
         new Thread(new Runnable() {
@@ -97,15 +104,33 @@ public class ChatClient {
                         System.exit(0);
 
                     }
-                    System.out.println("czeka");
 
                 }
-                System.out.println("wyszedłem z while");
             }
 
         }).start();
+        generateAndSendKeys();
 
-        System.out.println("Koniec while");
+
+    }
+
+    private void generateAndSendKeys() {
+        KeyPairGenerator keyPairGenerator = null;
+        try {
+            keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+
+        keyPairGenerator.initialize(1024);
+        KeyPair keyPair = keyPairGenerator.genKeyPair();
+            user=new User();
+            user.setPrivateKey(keyPair.getPrivate());
+            RSAPublicKey pK=(RSAPublicKey)keyPair.getPublic();
+            String message=user.getUserID()+":"+pK.getPublicExponent()+":"+ pK.getModulus();
+            protocol.sendMessage(message);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
