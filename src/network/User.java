@@ -1,9 +1,8 @@
 package network;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.*;
 import java.util.*;
 
 import static java.util.Collections.sort;
@@ -17,7 +16,6 @@ public class User {
     static Integer Q = 7919;//
     static Integer G = 7207;
     PrivateKey privateKey;
-    PublicKey publicKey;
     Map<String, PublicKey> publicKeyMap = new HashMap<>();
     String userID = new String();
     String r = new String();
@@ -27,7 +25,8 @@ public class User {
     Integer Z;
     Random random = new Random();
     List<Integer> otherZ = new ArrayList<>();
-    Long sessionKey = new Long(1);
+    Long computeKey = new Long(1);
+    Key sessionKey;
 
     public User() {
         for (int i = 0; i < K; i++) {
@@ -112,13 +111,12 @@ public class User {
 
 
         String sigma = "1" + (Z);
-        sort(nonceList);
+        Collections.sort(nonceList);
         for (Nonce nonce : nonceList) {
             sigma += nonce.toString();
         }
         try {
-
-
+            otherZ.add(Z);
             Signature signature = Signature.getInstance("SHA1withRSA");
             signature.initSign(privateKey, new SecureRandom());
             byte[] arr = sigma.getBytes();
@@ -154,12 +152,11 @@ public class User {
         }
         try {
 
-            // Collections.sort(nonceList);
+             Collections.sort(nonceList);
             String nonceStr = new String();
             for (Nonce nonce : nonceList) {
                 nonceStr += nonce.toString();
             }
-
 
             String verify = "1" + Zj + nonceStr;
             Signature signature = Signature.getInstance("SHA1withRSA");
@@ -188,7 +185,7 @@ public class User {
         //
         String X = getX(Z);
         String message = new String();
-        // Collections.sort(nonceList);
+         Collections.sort(nonceList);
         String nonceStr = new String();
         for (Nonce nonce : nonceList) {
             nonceStr += nonce.toString();
@@ -231,11 +228,10 @@ public class User {
         }
         try {
             String nonceStr = new String();
-            // Collections.sort(nonceList);
+             Collections.sort(nonceList);
             for (Nonce nonce : nonceList) {
                 nonceStr += nonce.toString();
             }
-
             String verify = "2" + Xj + nonceStr;
 
             Signature signature = Signature.getInstance("SHA1withRSA");
@@ -258,7 +254,7 @@ public class User {
     //TODO: ask if it is correct way, and then how to encrypt and decrypt message
     public void computeSessionKey() {
         Integer n = 0;
-        sort(otherZ);
+        Collections.sort(otherZ);
         for (int i = 0; i < otherZ.size() - 1; i++) {
             Integer si1 = getSi(otherZ.get(i));
             Integer si2 = getSi(otherZ.get(i + 1));
@@ -269,8 +265,12 @@ public class User {
         n = n + si1 * si2;
         n = n % Q;
         for (int i = 0; i < n; i++) {
-            sessionKey = (sessionKey * G) % Q;
+            computeKey = (computeKey * G) % Q;
         }
+        System.out.println("long:"+computeKey);
+        sessionKey= new SecretKeySpec(computeKey.toString().getBytes(),"AES");
+
+
 
     }
 

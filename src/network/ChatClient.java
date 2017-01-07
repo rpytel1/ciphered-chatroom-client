@@ -87,7 +87,7 @@ public class ChatClient {
             }
         }
 
-        if(protocol.receiveMessages().equals("startKeyDistribution"));
+        if (protocol.receiveMessages().equals("startKeyDistribution")) ;
 
 
         generateAndSendKeys();
@@ -97,6 +97,33 @@ public class ChatClient {
             setPublicKeys(messsage);
 
         }
+        user.setR();
+        String message = user.getUserID() + "0" + user.getR();
+        protocol.sendMessage(message);
+        user.addNonce(message);
+        for (int i = 0; i < userNumber - 1; i++) {
+            String msg = protocol.receiveMessages();
+            user.addNonce(msg);
+        }
+
+        for (Nonce nonce : user.nonceList) {
+            System.out.println("nonce:" + nonce.toString());
+        }
+        String messageSig = user.computeSignature();
+        protocol.sendMessage(messageSig);
+
+        for (int i = 0; i < userNumber - 1; i++) {
+            String msg = protocol.receiveMessages();
+            user.recieveSignature(msg);
+        }
+
+        String messageX = user.sendX();
+        protocol.sendMessage(messageX);
+        for (int i = 0; i < userNumber - 1; i++) {
+            String msg = protocol.receiveMessages();
+            user.reciveX(msg);
+        }
+        user.computeSessionKey();
 
 
         ChatWindow chatWindow = new ChatWindow(protocol, username);
@@ -133,12 +160,12 @@ public class ChatClient {
         try {
             keyPairGenerator = KeyPairGenerator.getInstance("RSA");
 
-        keyPairGenerator.initialize(1024);
-        KeyPair keyPair = keyPairGenerator.genKeyPair();
-            user=new User();
+            keyPairGenerator.initialize(1024);
+            KeyPair keyPair = keyPairGenerator.genKeyPair();
+            user = new User();
             user.setPrivateKey(keyPair.getPrivate());
-            RSAPublicKey pK=(RSAPublicKey)keyPair.getPublic();
-            String message=user.getUserID()+":"+pK.getPublicExponent()+":"+ pK.getModulus();
+            RSAPublicKey pK = (RSAPublicKey) keyPair.getPublic();
+            String message = user.getUserID() + ":" + pK.getPublicExponent() + ":" + pK.getModulus();
             protocol.sendMessage(message);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
