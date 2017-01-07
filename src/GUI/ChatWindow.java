@@ -1,6 +1,7 @@
 package GUI;
 
 import network.Protocol;
+import network.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,13 +22,15 @@ public class ChatWindow extends JFrame {
     JScrollPane textAreaScrollPane;
     Protocol protocol;
     String username;
+    User user;
 
-    public ChatWindow(Protocol protocol, String username) {
+    public ChatWindow(Protocol protocol, String username, User user) {
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("Chat room");
         this.protocol = protocol;
         this.username = username;
+        this.user = user;
 
         createTextArea();
         createTextField();
@@ -69,7 +72,8 @@ public class ChatWindow extends JFrame {
                 String text = textField.getText();
                 try {
                     updateTextArea(username + ":" + text);
-                    protocol.sendMessage(username + ":" + text);
+                    String encryptedMessage = user.encryptMessage(username + ":" + text);
+                    protocol.sendMessage(encryptedMessage);
                     System.out.println(username + text);
                 } catch (IOException e1) {
                     e1.printStackTrace();

@@ -126,7 +126,7 @@ public class ChatClient {
         user.computeSessionKey();
 
 
-        ChatWindow chatWindow = new ChatWindow(protocol, username);
+        ChatWindow chatWindow = new ChatWindow(protocol, username, user);
 
 
         new Thread(new Runnable() {
@@ -139,7 +139,8 @@ public class ChatClient {
                     try {
 
                         message = protocol.receiveMessages();
-                        chatWindow.updateTextArea(message);
+                        String decryptedMessage = user.decryptMessage(message);
+                        chatWindow.updateTextArea(decryptedMessage);
                     } catch (IOException e) {
                         e.printStackTrace();
                         outFlag = true;

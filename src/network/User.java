@@ -1,7 +1,11 @@
 package network;
 
-import javax.crypto.SecretKey;
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
+import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.math.BigInteger;
 import java.security.*;
 import java.util.*;
 
@@ -13,8 +17,8 @@ import static java.util.Collections.sort;
 public class User {
 
     static Integer K = 5;//Stopien zaszyfrowania
-    static Integer Q = 7919;//
-    static Integer G = 7207;
+    static Integer Q = 57751;//
+    static Integer G = 46183;
     PrivateKey privateKey;
     Map<String, PublicKey> publicKeyMap = new HashMap<>();
     String userID = new String();
@@ -161,6 +165,7 @@ public class User {
             String verify = "1" + Zj + nonceStr;
             Signature signature = Signature.getInstance("SHA1withRSA");
             PublicKey pubKey = publicKeyMap.get(idUser);
+            System.out.println("Key2: " + pubKey);
             signature.initVerify(pubKey);
             String sigma = message.substring(zEndIndex);
 
@@ -264,11 +269,16 @@ public class User {
         Integer si2 = getSi(otherZ.get(otherZ.size() - 1));
         n = n + si1 * si2;
         n = n % Q;
+        BigInteger bi = new BigInteger("1");
         for (int i = 0; i < n; i++) {
+            bi = bi.multiply(new BigInteger(G.toString()));
+            bi = bi.mod(new BigInteger(Q.toString()));
             computeKey = (computeKey * G) % Q;
         }
-        System.out.println("long:"+computeKey);
-        sessionKey= new SecretKeySpec(computeKey.toString().getBytes(),"AES");
+
+        String stringBi = bi.toString() + "11111111111";
+        System.out.println("stringBi: " + stringBi + "stringBiLength: " + stringBi.length());
+        sessionKey = new SecretKeySpec(stringBi.getBytes(), "AES");
 
 
 
@@ -331,5 +341,34 @@ public class User {
             if (cA[i] == '1') result += Math.pow(2, cA.length - i - 1);
         }
         return result;
+    }
+
+    public String encryptMessage(String message) {
+        String encryptedValue = null;
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, sessionKey);
+            byte[] encrytionValue = cipher.doFinal(message.getBytes());
+            encryptedValue = new BASE64Encoder().encode(encrytionValue);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return encryptedValue;
+    }
+
+    public String decryptMessage(String message) {
+        String decryptedValue = null;
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.DECRYPT_MODE, sessionKey);
+            byte[] decodeValue = new BASE64Decoder().decodeBuffer(message);
+            byte[] decodedValue = cipher.doFinal(decodeValue);
+            decryptedValue = new String(decodedValue);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return decryptedValue;
     }
 }
