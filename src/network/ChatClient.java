@@ -78,8 +78,9 @@ public class ChatClient {
             }
         }
 
-
+        if(protocol.receiveMessages().equals("startKeyDistribution"));
         ChatWindow chatWindow = new ChatWindow(protocol, username);
+
 
         new Thread(new Runnable() {
             @Override
