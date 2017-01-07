@@ -15,7 +15,7 @@ public class ChatClient {
      * username of the current user
      */
     String username;
-
+    boolean outFlag = false;
     /**
      * IP serwera, z którym łączy się klient
      */
@@ -24,7 +24,6 @@ public class ChatClient {
      * port serwera, z którym łączy się klient
      */
     private int serverPort;
-
     /**
      * instancja protokołu komunikacyjnego
      */
@@ -82,36 +81,30 @@ public class ChatClient {
 
         ChatWindow chatWindow = new ChatWindow(protocol, username);
 
-        Thread receiveThread = new Thread() {
+        new Thread(new Runnable() {
+            @Override
             public void run() {
-                while (true) {
+                while (!outFlag) {
                     String message = "";
 
                     try {
                         message = protocol.receiveMessages();
+                        chatWindow.updateTextArea(message);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        outFlag = true;
+                        System.exit(0);
+
                     }
                     System.out.println("czeka");
-                    chatWindow.updateTextArea(message);
+
                 }
+                System.out.println("wyszedłem z while");
             }
-        };
-        receiveThread.start();
+
+        }).start();
 
         System.out.println("Koniec while");
-
-      /*  Vector<String> columnNames = new Vector<>();
-        columnNames.add("ID");
-        columnNames.add("FileName");
-        columnNames.add("FilePath");
-        columnNames.add("Size");
-        columnNames.add("Checksum");*/
-
-        // String directrory = System.getProperty("user.dir");
-        //ClientBrowser clientBrowser = new ClientBrowser(protocol.getServerFiles(username), columnNames, username, serverIP, serverPort, protocol, directrory);
-        //    clientBrowser.updateFileRecords(serverIP,serverPort,username,protocol.getFileRecords(username));
-        System.out.print("");
     }
 }
 

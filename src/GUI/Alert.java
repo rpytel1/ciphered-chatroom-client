@@ -21,7 +21,7 @@ public class Alert extends JFrame {
 
         panel.setLayout(new GridLayout(2, 1));
         setTitle("Alert");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        //setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(300, 100);
         setLocation(300, 300);
         setAlwaysOnTop(true);
