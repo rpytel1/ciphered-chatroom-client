@@ -3,11 +3,11 @@ package network;
 import GUI.*;
 
 import java.io.IOException;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.math.BigInteger;
+import java.security.*;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 
 /**
  * Created by Marcin Jamroz on 15.11.2016.
@@ -16,6 +16,8 @@ import java.security.interfaces.RSAPublicKey;
 public class ChatClient {
 
 
+    public static final Object monitor = new Object();
+    public static boolean monitorState = false;
     /**
      * username of the current user
      */
@@ -34,6 +36,7 @@ public class ChatClient {
      */
     private Protocol protocol;
     private User user;
+    private int userNumber = 2;
 
     public static void main(String[] args) {
         ChatClient chatClient = new ChatClient();
@@ -85,8 +88,55 @@ public class ChatClient {
         }
 
         if(protocol.receiveMessages().equals("startKeyDistribution"));
-        ChatWindow chatWindow = new ChatWindow(protocol, username);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                for (int i = 0; i < userNumber - 1; i++) {
+                    try {
+                        String receivedMessage = protocol.receiveMessages();
+                        int finalI = i;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setPublicKeys(receivedMessage);
+                                if (finalI == userNumber - 1) {
+                                    monitorState = false;
+                                    monitor.notifyAll();
+                                }
+                            }
+                        });
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                try {
+                    protocol.sendMessage("settingKeysDone");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
         generateAndSendKeys();
+
+        monitorState = true;
+        while (monitorState) {
+            synchronized (monitor) {
+                try {
+                    monitor.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+
+        ChatWindow chatWindow = new ChatWindow(protocol, username);
+
 
 
         new Thread(new Runnable() {
@@ -109,7 +159,6 @@ public class ChatClient {
             }
 
         }).start();
-        generateAndSendKeys();
 
 
     }
@@ -131,6 +180,26 @@ public class ChatClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void setPublicKeys(String message) {
+        String[] splittedMessage = message.split(":");
+        user.getPossibleUsers().add(splittedMessage[0]);
+
+        RSAPublicKeySpec spec = new RSAPublicKeySpec(new BigInteger(splittedMessage[2]), new BigInteger(splittedMessage[1]));
+        KeyFactory factory = null;
+        PublicKey pub = null;
+        try {
+            factory = KeyFactory.getInstance("RSA");
+            pub = factory.generatePublic(spec);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+
+
+        user.getPublicKeyMap().put(splittedMessage[0], pub);
     }
 }
 
