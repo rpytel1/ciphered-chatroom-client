@@ -74,7 +74,6 @@ public class ChatWindow extends JFrame {
                     updateTextArea(username + ":" + text);
                     String encryptedMessage = user.encryptMessage(username + ":" + text);
                     protocol.sendMessage(encryptedMessage);
-                    System.out.println(username + text);
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }

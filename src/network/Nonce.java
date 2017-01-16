@@ -43,7 +43,7 @@ public class Nonce implements Comparable {
         if (compID == ID) {
             return 0;
         } else
-            return -1;
+            return 1;
 
     }
 }

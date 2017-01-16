@@ -8,6 +8,7 @@ import java.security.*;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Collections;
 
 /**
  * Created by Marcin Jamroz on 15.11.2016.
@@ -15,9 +16,6 @@ import java.security.spec.RSAPublicKeySpec;
  */
 public class ChatClient {
 
-
-    public static final Object monitor = new Object();
-    public static boolean monitorState = false;
     /**
      * username of the current user
      */
@@ -36,7 +34,7 @@ public class ChatClient {
      */
     private Protocol protocol;
     private User user;
-    private int userNumber = 2;
+    private int userNumber = 3;
 
     public static void main(String[] args) {
         ChatClient chatClient = new ChatClient();
@@ -45,7 +43,6 @@ public class ChatClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
     }
 
@@ -104,10 +101,6 @@ public class ChatClient {
         for (int i = 0; i < userNumber - 1; i++) {
             String msg = protocol.receiveMessages();
             user.addNonce(msg);
-        }
-
-        for (Nonce nonce : user.nonceList) {
-            System.out.println("nonce:" + nonce.toString());
         }
         String messageSig = user.computeSignature();
         protocol.sendMessage(messageSig);

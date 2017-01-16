@@ -68,7 +68,7 @@ public class Protocol {
     public String receiveMessages() throws IOException {
 
         String message = "";
-            message = dis.readUTF();
+        message = dis.readUTF();
         System.out.println(message);
         return message;
     }

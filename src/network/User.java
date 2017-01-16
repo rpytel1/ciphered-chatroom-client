@@ -156,7 +156,7 @@ public class User {
         }
         try {
 
-             Collections.sort(nonceList);
+            Collections.sort(nonceList);
             String nonceStr = new String();
             for (Nonce nonce : nonceList) {
                 nonceStr += nonce.toString();
@@ -165,15 +165,12 @@ public class User {
             String verify = "1" + Zj + nonceStr;
             Signature signature = Signature.getInstance("SHA1withRSA");
             PublicKey pubKey = publicKeyMap.get(idUser);
-            System.out.println("Key2: " + pubKey);
             signature.initVerify(pubKey);
             String sigma = message.substring(zEndIndex);
 
             byte[] arr = Base64.getDecoder().decode(sigma.getBytes());
             signature.update(verify.getBytes());
             boolean result = signature.verify(arr);
-
-            System.out.println(result);
 
             otherZ.add(new Integer(Zj));
 
@@ -190,7 +187,7 @@ public class User {
         //
         String X = getX(Z);
         String message = new String();
-         Collections.sort(nonceList);
+        Collections.sort(nonceList);
         String nonceStr = new String();
         for (Nonce nonce : nonceList) {
             nonceStr += nonce.toString();
@@ -233,7 +230,7 @@ public class User {
         }
         try {
             String nonceStr = new String();
-             Collections.sort(nonceList);
+            Collections.sort(nonceList);
             for (Nonce nonce : nonceList) {
                 nonceStr += nonce.toString();
             }
@@ -248,7 +245,6 @@ public class User {
 
             signature.update(verify.getBytes());
             boolean result = signature.verify(arr);
-            System.out.println(result);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -277,9 +273,8 @@ public class User {
         }
 
         String stringBi = bi.toString() + "11111111111";
-        System.out.println("stringBi: " + stringBi + "stringBiLength: " + stringBi.length());
-        sessionKey = new SecretKeySpec(stringBi.getBytes(), "AES");
 
+        sessionKey = new SecretKeySpec(stringBi.getBytes(), "AES");
 
 
     }
@@ -310,7 +305,7 @@ public class User {
             prevIndex = otherZ.size() - 1;
         }
         if (aftIndex > otherZ.size() - 1) {
-            aftIndex = 0;
+                aftIndex = 0;
         }
         Integer Z1 = otherZ.get(prevIndex);
         Integer Z2 = otherZ.get(aftIndex);
