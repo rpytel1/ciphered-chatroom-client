@@ -16,20 +16,20 @@ import static java.util.Collections.sort;
  */
 public class User {
 
-    static Integer K = 5;//Stopien zaszyfrowania
-    static Integer Q = 57751;//
-    static Integer G = 46183;
+    static Integer K = 5;
+    static BigInteger Q = new BigInteger("245733731021662473457347562398375784363");
+    static BigInteger G = new BigInteger("192131622250640046321617811902039558669");
     PrivateKey privateKey;
     Map<String, PublicKey> publicKeyMap = new HashMap<>();
     String userID = new String();
     String r = new String();
-    List<String> possibleUsers = new ArrayList<>(); //Powinno sie dodać zbior dostepnych userow
+    List<String> possibleUsers = new ArrayList<>();
     List<Nonce> nonceList = new ArrayList<>();
     Nonce myNonce;
-    Integer Z;
+    BigInteger Z;
     Random random = new Random();
-    List<Integer> otherZ = new ArrayList<>();
-    Long computeKey = new Long(1);
+    List<BigInteger> otherZ = new ArrayList<>();
+    BigInteger computeKey = new BigInteger("1");
     Key sessionKey;
 
     public User() {
@@ -106,12 +106,28 @@ public class User {
     //STEP 2
     public String computeSignature() {
         String message = new String();
-        int s = random.nextInt(Q);
-        //Compute Z
-        Z = 1;
-        for (int i = 0; i < s; i++) {
-            Z = (Z * G) % Q;
-        }
+
+
+        boolean duplicate = false;
+        Random rnd = new Random();
+        BigInteger s = new BigInteger(16, rnd);
+
+
+        while (!duplicate) {
+            if (s.compareTo(Q) == -1) {
+                duplicate = true;
+            }
+            else
+            s = new BigInteger(16, rnd);
+
+        }      //Compute Z
+        Z = new BigInteger("1");
+
+        Z = G.modPow(s, Q);
+
+
+
+
 
 
         String sigma = "1" + (Z);
@@ -172,7 +188,7 @@ public class User {
             signature.update(verify.getBytes());
             boolean result = signature.verify(arr);
 
-            otherZ.add(new Integer(Zj));
+            otherZ.add(new BigInteger(Zj));
 
 
         } catch (Exception e) {
@@ -254,48 +270,54 @@ public class User {
 
     //TODO: ask if it is correct way, and then how to encrypt and decrypt message
     public void computeSessionKey() {
-        Integer n = 0;
+        BigInteger n = new BigInteger("0");
         Collections.sort(otherZ);
         for (int i = 0; i < otherZ.size() - 1; i++) {
-            Integer si1 = getSi(otherZ.get(i));
-            Integer si2 = getSi(otherZ.get(i + 1));
-            n = n + si1 * si2;
+            BigInteger si1 = getSi(otherZ.get(i));
+            BigInteger si2 = getSi(otherZ.get(i + 1));
+            n = n.add(si1.multiply(si2));
         }
-        Integer si1 = getSi(otherZ.get(0));
-        Integer si2 = getSi(otherZ.get(otherZ.size() - 1));
-        n = n + si1 * si2;
-        n = n % Q;
+        BigInteger si1 = getSi(otherZ.get(0));
+        BigInteger si2 = getSi(otherZ.get(otherZ.size() - 1));
+        n = n.add(si1.multiply(si2));
+        // n = n.mod(Q);
         BigInteger bi = new BigInteger("1");
-        for (int i = 0; i < n; i++) {
-            bi = bi.multiply(new BigInteger(G.toString()));
-            bi = bi.mod(new BigInteger(Q.toString()));
-            computeKey = (computeKey * G) % Q;
+
+
+        bi = G.modPow(n, Q);
+
+        System.out.println(userID + "sessionKey: " + bi);
+
+        if(bi.bitLength() > 16){
+            bi = bi.shiftRight(1);
         }
 
-        String stringBi = bi.toString() + "11111111111";
-
-        sessionKey = new SecretKeySpec(stringBi.getBytes(), "AES");
+        sessionKey = new SecretKeySpec(bi.toByteArray(), "AES");
 
 
     }
 
 
-    public Integer getSi(Integer Zi) {
-        boolean undone = true;
-        int si = 1;
-        int m = G % Q;
-        while (undone) {
-            if (m == Zi) {
-                undone = false;
-            } else {
-                m = (m * G) % Q;
-                si++;
+    public BigInteger getSi(BigInteger Zi) {
+        BigInteger OZ = G.mod(Q);
+        boolean pow = false;
+        BigInteger si = new BigInteger("2");
+
+        while(!pow){
+            if(OZ.compareTo(Zi) == 0){
+                pow=true;
+                si = si.subtract(new BigInteger("1"));
+
+            }
+            else {
+                OZ = G.modPow(si,Q);
+                si = si.add(new BigInteger("1"));
             }
         }
         return si;
     }
 
-    public String getX(Integer k) {
+    public String getX(BigInteger k) {
         //TODO: check if it is correct way to compute X
         sort(otherZ);
         int index = otherZ.indexOf(k);
@@ -305,26 +327,22 @@ public class User {
             prevIndex = otherZ.size() - 1;
         }
         if (aftIndex > otherZ.size() - 1) {
-                aftIndex = 0;
+            aftIndex = 0;
         }
-        Integer Z1 = otherZ.get(prevIndex);
-        Integer Z2 = otherZ.get(aftIndex);
+        BigInteger Z1 = otherZ.get(prevIndex);
+        BigInteger Z2 = otherZ.get(aftIndex);
 
-        int s2 = getSi(Z2);
-        int n = Q - 1 - s2;
-        if (n < 0) {
-            n += Q;
+        BigInteger s2 = getSi(Z2);
+        BigInteger n = (Q.subtract(new BigInteger("1"))).subtract(s2);
+
+        if (n.compareTo(BigInteger.valueOf(0)) == 0) {
+            n = n.add(Q);
         }
-        Integer otherZ2 = 1;
-        for (int i = 0; i < n; i++) {
-            otherZ2 = (otherZ2 * G) % Q;
-        }
-        Integer Xi = Z1 * otherZ2;
-        Integer copy = Xi;
-        Integer pow = Integer.parseInt(r, 2);
-        for (int i = 0; i < pow; i++) {
-            Xi = (Xi * copy) % Q;
-        }
+
+        BigInteger otherZ2 = new BigInteger("1");
+        otherZ2 = G.modPow(n,Q);
+
+        BigInteger Xi = (Z1.multiply(otherZ2)).modPow(new BigInteger(r),Q);
 
         return Xi.toString();
     }

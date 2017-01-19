@@ -69,7 +69,6 @@ public class Protocol {
 
         String message = "";
         message = dis.readUTF();
-        System.out.println(message);
         return message;
     }
 
